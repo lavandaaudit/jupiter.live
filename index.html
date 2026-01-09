@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex,nofollow">
+  <title>JUPITER LABORATORIUM LAB LIVE</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; background: #000; overflow: hidden;
+      color: #cfefff; font-family: 'Cinzel', serif; letter-spacing: 0.08em;
+    }
+    canvas { position: fixed; inset: 0; z-index: 0; }
+    .container {
+      position: relative; z-index: 1; height: 100vh;
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 50px 40px; max-width: 1400px; margin: 0 auto;
+    }
+    .header {
+      text-align: center; font-size: clamp(28px, 6vw, 68px); font-weight: 800;
+      letter-spacing: 0.18em; text-transform: uppercase; line-height: 1.2; opacity: 0.95;
+      text-shadow: 0 0 20px rgba(77, 210, 255, 0.3);
+    }
+    .subtitle {
+      text-align: center; font-size: clamp(14px, 2.5vw, 24px); font-weight: 500;
+      letter-spacing: 0.25em; opacity: 0.7; margin-top: 16px;
+    }
+    #threejs-model {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 600px; height: 600px; z-index: 1; opacity: 0.9;
+    }
+    .data-panel {
+      text-align: center; font-size: 13px; letter-spacing: 0.2em; opacity: 0.8;
+      line-height: 1.8; margin-top: 20px;
+    }
+    .footer {
+      text-align: center; font-size: 11px; letter-spacing: 0.35em; opacity: 0.5; font-weight: 400;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.20/astronomy.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <canvas id="stars"></canvas>
+
+  <div class="container">
+    <div>
+      <div class="header">JUPITER</div>
+      <div class="header">LABORATORIUM</div>
+      <div class="subtitle">lab live</div>
+    </div>
+
+    <div id="threejs-model"></div>
+
+    <div class="data-panel" id="live-data">
+      Завантаження даних...
+    </div>
+
+    <div class="footer">
+      UNDERGROUND COSMO DYNAMIC TRANSMISSION · 2026
+    </div>
+  </div>
+
+  <script>
+    // Зоряне поле (без змін)
+    const canvas = document.getElementById("stars");
+    const ctx = canvas.getContext("2d");
+    let W, H; let stars = [];
+    function resize() {
+      W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight;
+      stars = Array.from({ length: 300 }, () => ({ x: Math.random() * W, y: Math.random() * H, z: Math.random() * W, prevZ: 0 }));
+    }
+    resize(); window.addEventListener("resize", resize);
+    function renderStars() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.08)"; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "#4dd2ff";
+      for (let s of stars) {
+        s.prevZ = s.z; s.z -= 1.2;
+        if (s.z <= 0) { s.z = W; s.x = Math.random() * W; s.y = Math.random() * H; s.prevZ = s.z; }
+        const k = 300 / s.z; const prevK = 300 / s.prevZ;
+        const x = (s.x - W / 2) * k + W / 2; const y = (s.y - H / 2) * k + H / 2;
+        const prevX = (s.x - W / 2) * prevK + W / 2; const prevY = (s.y - H / 2) * prevK + H / 2;
+        if (x >= 0 && x <= W && y >= 0 && y <= H) {
+          const size = (1 - s.z / W) * 3;
+          ctx.beginPath(); ctx.moveTo(prevX, prevY); ctx.lineTo(x, y); ctx.lineWidth = size; ctx.stroke();
+        }
+      }
+      requestAnimationFrame(renderStars);
+    }
+    renderStars();
+
+    // 3D модель Юпітера
+    const container = document.getElementById('threejs-model');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    // Текстура 4K Cassini (надійне посилання)
+    const textureLoader = new THREE.TextureLoader();
+    const jupiterTexture = textureLoader.load('https://planetpixelemporium.com/download/download.php?jupiter2_4k.jpg');
+    const geometry = new THREE.SphereGeometry(5, 64, 64);
+    const material = new THREE.MeshBasicMaterial({ map: jupiterTexture });
+    const jupiter = new THREE.Mesh(geometry, material);
+    scene.add(jupiter);
+
+    // Супутники
+    const moons = ['Io', 'Europa', 'Ganymede', 'Callisto'];
+    const moonMeshes = [];
+    moons.forEach((moon, i) => {
+      const moonGeo = new THREE.SphereGeometry(0.2 + i*0.15, 16, 16);
+      const moonMat = new THREE.MeshBasicMaterial({ color: 0xdddddd });
+      const moonMesh = new THREE.Mesh(moonGeo, moonMat);
+      scene.add(moonMesh);
+      moonMeshes.push(moonMesh);
+    });
+
+    camera.position.z = 15;
+
+    function updateMoons() {
+      const now = new Date();
+      const jmoons = Astronomy.JupiterMoons(now); // Правильна функція!
+      moonMeshes[0].position.set(jmoons.io.x / 100000, jmoons.io.y / 100000, jmoons.io.z / 100000);
+      moonMeshes[1].position.set(jmoons.europa.x / 100000, jmoons.europa.y / 100000, jmoons.europa.z / 100000);
+      moonMeshes[2].position.set(jmoons.ganymede.x / 100000, jmoons.ganymede.y / 100000, jmoons.ganymede.z / 100000);
+      moonMeshes[3].position.set(jmoons.callisto.x / 100000, jmoons.callisto.y / 100000, jmoons.callisto.z / 100000);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      jupiter.rotation.y += 0.002;
+      renderer.render(scene, camera);
+    }
+    animate();
+    updateMoons();
+    setInterval(updateMoons, 60000);
+
+    // Живі дані
+    const dataDiv = document.getElementById("live-data");
+    async function updateData() {
+      const now = new Date();
+      const distAU = Astronomy.HelioDistance('Jupiter', now);
+      const distKm = distAU * 149597871;
+      const rtltMinutes = (distAU * 499.0 / 30).toFixed(0); // ~2 * light time
+
+      // Супутники для тексту
+      const jmoons = Astronomy.JupiterMoons(now);
+      let moonsPos = `Io: ${jmoons.io.x.toFixed(1)} Europa: ${jmoons.europa.x.toFixed(1)} Ganymede: ${jmoons.ganymede.x.toFixed(1)} Callisto: ${jmoons.callisto.x.toFixed(1)} Rj`;
+
+      // DSN (спрощено через нову структуру)
+      let dsnStatus = 'DSN → JUNO: неактивний';
+      try {
+        const resp = await fetch('https://eyes.nasa.gov/dsn/data/dsn.xml');
+        const text = await resp.text();
+        if (text.includes('JUNO')) dsnStatus = 'DSN → JUNO: активний зв\'язок';
+      } catch(e) { dsnStatus = 'DSN: дані недоступні'; }
+
+      // GRS (актуально на січень 2026)
+      const baseDate = new Date('2025-11-01');
+      const monthsPassed = (now - baseDate) / (30*24*60*60*1000);
+      let grsLon = 43 + monthsPassed * 1.75; // оновлена база
+      grsLon = ((grsLon % 360) + 360) % 360;
+      const grsVisible = grsLon < 180 ? 'ВИДИМИЙ' : 'НЕВИДИМИЙ';
+
+      dataDiv.innerHTML = `
+        ВІДСТАНЬ: ${distKm.toExponential(3)} км  RTLT: ${rtltMinutes} хв<br>
+        СУПУТНИКИ (X від Юпітера): ${moonsPos}<br>
+        ${dsnStatus}  GRS: ${grsLon.toFixed(1)}° (${grsVisible})
+      `;
+    }
+    updateData();
+    setInterval(updateData, 60000);
+  </script>
+</body>
+</html>
