@@ -28,23 +28,23 @@
 
   <div class="container">
 
-    <!-- Статична красива модель (Sketchfab) -->
+    <!-- Статична модель (Sketchfab) -->
     <div class="section">
-      <div class="label">СТАТИЧНА 3D МОДЕЛЬ — деталізований вигляд Юпітера</div>
+      <div class="label">СТАТИЧНА 3D МОДЕЛЬ — деталізований вигляд</div>
       <iframe src="https://sketchfab.com/models/7f5f9e0b03fd464c8e3c7464232a072d/embed?autostart=1&transparent=1&ui_hint=0&ui_infos=0&ui_watermark=0" allowfullscreen></iframe>
-      <p>Крути мишкою • Зум колесом • Художня реконструкція</p>
+      <p>Крути мишкою • Зум колесом</p>
     </div>
 
     <!-- Динамічна модель з реальними позиціями -->
     <div class="section">
       <div class="label">ДИНАМІЧНА 3D МОДЕЛЬ — супутники рухаються в реальному часі</div>
       <div id="threejs-container" class="threejs-container"></div>
-      <p>Супутники оновлюються кожну хвилину • Реальні орбіти на зараз</p>
+      <p>Оновлення кожні 5 секунд • Реальні орбіти Io, Europa, Ganymede, Callisto</p>
     </div>
 
-    <!-- Juno's View (архівні фото) -->
+    <!-- Juno's View (архів) -->
     <div class="section">
-      <div class="label">JUNO'S VIEW — архівні знімки (місія Juno завершена 2025)</div>
+      <div class="label">JUNO'S VIEW — архівні знімки (місія завершена 2025)</div>
       <div class="gallery">
         <img src="https://science.nasa.gov/wp-content/uploads/2023/09/jupiter_marble_1024.jpg" alt="Jupiter full view">
         <img src="https://photojournal.jpl.nasa.gov/jpeg/PIA26295.jpg" alt="North Polar Cyclones">
@@ -52,36 +52,25 @@
       </div>
     </div>
 
-    <!-- Live Data Dashboard -->
+    <!-- Radio JOVE -->
     <div class="section">
-      <div class="data-box">
-        <div class="label">РЕАЛЬНИЙ ЧАС — дані прямо зараз</div>
-        <div class="status" id="moons-status">Позиції супутників: завантаження...</div>
-        <div class="status" id="rtt">Round Trip Light Time: завантаження...</div>
-        <div class="status" id="dsn-status">DSN статус JUNO: завантаження...</div>
-        <div class="status" id="timestamp">Останнє оновлення: —</div>
-      </div>
-    </div>
-
-    <!-- Radio JOVE Live -->
-    <div class="section">
-      <div class="label">RADIO JOVE MONITOR — живий радіошум Юпітера (16-24 MHz)</div>
+      <div class="label">RADIO JOVE MONITOR — живий радіошум (16-24 MHz)</div>
       <iframe src="https://www.youtube.com/embed/live_stream?channel=UCtawz3MnMBwjz9ShhSC0ygQ&autoplay=1" allowfullscreen></iframe>
-      <p>Слухай сплески S-bursts від Іо в реальному часі! • Спектрограма + аудіо 24/7</p>
+      <p>Спектрограма + аудіо сплесків від Іо в реальному часі</p>
     </div>
 
     <!-- Storm Dynamics -->
     <div class="section">
       <div class="label">STORM DYNAMICS — Велика Червона Пляма</div>
       <img src="https://science.nasa.gov/wp-content/uploads/2024/06/jupiter-red-spot-animation.gif" alt="Great Red Spot" style="width:80%; border-radius:20px;">
-      <p>Анімація руху штормів • Полярні циклони • Постійний вир Юпітера</p>
+      <p>Анімація штормів • Полярні циклони</p>
     </div>
 
   </div>
 
   <footer>UNDERGROUND COSMO DYNAMIC TRANSMISSION · JANUARY 2026</footer>
 
-  <!-- Astronomy Engine + Three.js -->
+  <!-- Скрипти -->
   <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.20/astronomy.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
@@ -94,17 +83,23 @@
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
-    // Текстура Юпітера
+    // Текстура Юпітера (fallback на колір, якщо не завантажиться)
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load('https://www.solarsystemscope.com/textures/download/8k_jupiter.jpg', (texture) => {
       const geo = new THREE.SphereGeometry(5, 64, 64);
       const mat = new THREE.MeshBasicMaterial({ map: texture });
       const jupiter = new THREE.Mesh(geo, mat);
       scene.add(jupiter);
+    }, undefined, () => {
+      // Fallback якщо текстура не завантажилася
+      const geo = new THREE.SphereGeometry(5, 64, 64);
+      const mat = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
+      const jupiter = new THREE.Mesh(geo, mat);
+      scene.add(jupiter);
     });
 
     // Супутники
-    const moonColors = [0xffaa00, 0xaaaaaa, 0xdddddd, 0x888888]; // Io, Europa, Ganymede, Callisto
+    const moonColors = [0xffaa00, 0xaaaaaa, 0xdddddd, 0x888888];
     const moonMeshes = [];
     for (let i = 0; i < 4; i++) {
       const geo = new THREE.SphereGeometry(0.3 + i*0.15, 16, 16);
@@ -133,7 +128,7 @@
     }
     animate();
 
-    // Resize для мобілок
+    // Resize
     window.addEventListener('resize', () => {
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
@@ -141,10 +136,10 @@
     });
 
     // Live Data Dashboard
-    async function loadData() {
+    function updateDashboard() {
       const now = new Date();
 
-      // Позиції супутників (дублюємо для тексту)
+      // Позиції супутників
       const moons = Astronomy.JupiterMoons(now);
       let moonsText = '';
       ['Io', 'Europa', 'Ganymede', 'Callisto'].forEach(m => {
@@ -158,22 +153,14 @@
       const rtltMinutes = (distAU * 499 * 2 / 60).toFixed(0);
       document.getElementById('rtt').textContent = `Round Trip Light Time: ${rtltMinutes} хвилин`;
 
-      // DSN
-      try {
-        const response = await fetch('https://eyes.nasa.gov/dsn/data/dsn.xml');
-        const text = await response.text();
-        document.getElementById('dsn-status').textContent = text.includes('JUNO') 
-          ? 'DSN → JUNO: активний зв\'язок' 
-          : 'DSN → JUNO: немає активного зв\'язку';
-      } catch {
-        document.getElementById('dsn-status').textContent = 'DSN статус: дані недоступні';
-      }
+      // DSN (спрощено, без fetch — Juno не відстежується)
+      document.getElementById('dsn-status').textContent = 'DSN → JUNO: місія завершена (немає активного зв\'язку)';
 
       document.getElementById('timestamp').textContent = `Останнє оновлення: ${now.toUTCString()}`;
     }
 
-    loadData();
-    setInterval(loadData, 60000);
+    updateDashboard();
+    setInterval(updateDashboard, 5000); // Оновлення кожні 5 секунд
   </script>
 </body>
 </html>
