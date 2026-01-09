@@ -1,12 +1,18 @@
 {
-    "timestamp": "2026-01-09T08:02:58.449688",
+    "timestamp": "2026-01-09T08:46:28.614785Z",
     "junocam": {
         "perijove": "Unknown",
-        "images": []
+        "images": [
+            "https://science.nasa.gov/wp-content/uploads/2023/09/jupiter_marble_1024.jpg"
+        ]
     },
-    "dsn": {},
+    "dsn": {
+        "status": "неактивний",
+        "data_rate": "N/A",
+        "frequency": "N/A",
+        "rtt": "N/A"
+    },
     "radio_jove": {
-        "intensity_graph_url": "N/A",
-        "latest_burst": "None"
+        "stream_url": "https://www.youtube.com/embed/live_stream?channel=UCtawz3MnMBwjz9ShhSC0ygQ&autoplay=1"
     }
 }
