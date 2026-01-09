@@ -1,16 +1,12 @@
 {
-  "timestamp": "2026-01-09T00:00:00",
-  "junocam": {
-    "perijove": "Loading...",
-    "images": []
-  },
-  "dsn": {
-    "data_rate": "N/A",
-    "frequency": "N/A",
-    "rtt": "N/A"
-  },
-  "radio_jove": {
-    "intensity_graph_url": "N/A",
-    "latest_burst": "None"
-  }
+    "timestamp": "2026-01-09T08:02:58.449688",
+    "junocam": {
+        "perijove": "Unknown",
+        "images": []
+    },
+    "dsn": {},
+    "radio_jove": {
+        "intensity_graph_url": "N/A",
+        "latest_burst": "None"
+    }
 }
