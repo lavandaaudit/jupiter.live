@@ -1,146 +1,160 @@
-<script>
-const c = document.getElementById('c');
-const ctx = c.getContext('2d');
+<!-- index.html (for GitHub Pages) -->
 
-let W, H;
-let stars = [];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUPITER LIVE: THE KING MONITOR</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #000; color: #fff; }
+        #visual-center { text-align: center; }
+        #dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        canvas { border: 1px solid #fff; }
+    </style>
+    <!-- CDN for libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.20/astronomy.min.js"></script>
+</head>
+<body>
+    <h1>JUPITER LIVE: THE KING MONITOR</h1>
+    
+    <!-- 1. Visual Center -->
+    <section id="visual-center">
+        <h2>Juno’s View</h2>
+        <div id="junocam-gallery"></div>
+        
+        <h2>3D Interactive Model</h2>
+        <div id="threejs-container" style="width: 800px; height: 600px; margin: auto;"></div>
+    </section>
+    
+    <!-- 2. Dashboard -->
+    <section id="dashboard">
+        <div id="radio-jove"></div>
+        <div id="dsn-status"></div>
+        <!-- Add more panels -->
+    </section>
+    
+    <!-- 3. Animations -->
+    <section id="animations">
+        <h2>Storm Dynamics</h2>
+        <div id="storm-gif"></div>
+        
+        <h2>Transit Predictor</h2>
+        <div id="transit-info"></div>
+    </section>
+    
+    <script>
+        // Fetch data from jupiter_state.json
+        async function loadData() {
+            try {
+                const response = await fetch('jupiter_state.json');
+                return await response.json();
+            } catch (e) {
+                console.error('Error loading data:', e);
+                return {};
+            }
+        }
 
-let density = 300;
-let speed = 1.2;
-let chaos = 0;
-let windX = 0;
-let windY = 0;
-let hue = 200;
+        // Display JunoCam images
+        function displayJunoCam(data) {
+            const gallery = document.getElementById('junocam-gallery');
+            gallery.innerHTML = '';
+            data.junocam.images.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = 'JunoCam Image';
+                img.style.width = '200px';
+                gallery.appendChild(img);
+            });
+            gallery.insertAdjacentHTML('beforeend', `<p>Latest Perijove: ${data.junocam.perijove}</p>`);
+        }
 
-let ibo = false;
-let grav = false;
-let audioOn = false;
+        // Display DSN Status
+        function displayDSN(data) {
+            const dsnDiv = document.getElementById('dsn-status');
+            dsnDiv.innerHTML = `
+                <h3>DSN Status for JUNO</h3>
+                <p>Data Rate: ${data.dsn.data_rate || 'N/A'} kbps</p>
+                <p>Frequency: ${data.dsn.frequency || 'N/A'}</p>
+                <p>Round Trip Time: ${data.dsn.rtt || 'N/A'}</p>
+            `;
+        }
 
-let gravityCenters = [];
-let audioAmp = 0;
+        // Display Radio JOVE (Plotly example)
+        function displayRadioJove(data) {
+            const radioDiv = document.getElementById('radio-jove');
+            radioDiv.innerHTML = '<h3>Radio JOVE Monitor</h3><div id="radio-plot" style="width:300px;height:200px;"></div>';
+            // Placeholder data; replace with actual from JSON
+            const plotData = [{ x: [1,2,3], y: [10,15,13], type: 'scatter' }];
+            Plotly.newPlot('radio-plot', plotData, { title: 'Intensity Graph' });
+            radioDiv.insertAdjacentHTML('beforeend', `<p>Latest Burst: ${data.radio_jove.latest_burst}</p>`);
+        }
 
-function resize() {
-  W = c.width = window.innerWidth;
-  H = c.height = window.innerHeight;
-  createStars();
-}
-window.addEventListener('resize', resize);
+        // 3D Model with Three.js and Astronomy Engine
+        function init3D() {
+            const container = document.getElementById('threejs-container');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
 
-function createStars() {
-  stars = [];
-  for (let i = 0; i < density; i++) {
-    stars.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      z: Math.random() * W,
-      a: Math.random() * Math.PI * 2,
-      px: 0,
-      py: 0
-    });
-  }
-}
-resize();
+            // Jupiter sphere
+            const textureLoader = new THREE.TextureLoader();
+            const jupiterTexture = textureLoader.load('https://science.nasa.gov/wp-content/uploads/2023/09/jupiter_marble_1024.jpg'); // Example texture
+            const geometry = new THREE.SphereGeometry(5, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ map: jupiterTexture });
+            const jupiter = new THREE.Mesh(geometry, material);
+            scene.add(jupiter);
 
-function draw() {
-  ctx.fillStyle = 'rgba(0,0,0,0.12)';
-  ctx.fillRect(0, 0, W, H);
+            // Add moons (positions from Astronomy Engine)
+            const now = new Date();
+            const moons = ['Io', 'Europa', 'Ganymede', 'Callisto'];
+            moons.forEach(moon => {
+                const pos = Astronomy.Position(moon, now); // Jovicentric position
+                const moonGeo = new THREE.SphereGeometry(0.5, 16, 16);
+                const moonMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const moonMesh = new THREE.Mesh(moonGeo, moonMat);
+                moonMesh.position.set(pos.x / 1000000, pos.y / 1000000, pos.z / 1000000); // Scale down
+                scene.add(moonMesh);
+            });
 
-  ctx.strokeStyle = `hsl(${hue},100%,70%)`;
-  ctx.fillStyle = `hsl(${hue},100%,70%)`;
+            camera.position.z = 20;
 
-  for (let s of stars) {
-    s.px = s.x;
-    s.py = s.y;
+            function animate() {
+                requestAnimationFrame(animate);
+                jupiter.rotation.y += 0.001;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
 
-    s.z -= speed + audioAmp * 0.03;
-    if (s.z <= 0) {
-      s.z = W;
-      s.x = Math.random() * W;
-      s.y = Math.random() * H;
-      continue;
-    }
+        // Transit Predictor (example)
+        function displayTransit() {
+            const transitDiv = document.getElementById('transit-info');
+            // Use Astronomy Engine to calculate next transit
+            // Placeholder
+            transitDiv.innerHTML = '<p>Next Io Transit: Calculating...</p>';
+        }
 
-    if (ibo) {
-      s.a += 0.002;
-      s.x += Math.cos(s.a) * 0.4;
-      s.y += Math.sin(s.a) * 0.4;
-    }
+        // Main init
+        async function init() {
+            const data = await loadData();
+            displayJunoCam(data);
+            displayDSN(data);
+            displayRadioJove(data);
+            init3D();
+            displayTransit();
+            // Add more: Storm GIF, etc.
+            // For storm: <img src="https://www.nasa.gov/sites/default/files/thumbnails/image/juno_polar_cyclones.gif">
+        }
 
-    if (grav) {
-      for (let g of gravityCenters) {
-        let dx = g.x - s.x;
-        let dy = g.y - s.y;
-        let d = Math.sqrt(dx * dx + dy * dy) + 40;
-        s.x += dx / d * 0.4;
-        s.y += dy / d * 0.4;
-      }
-    }
+        init();
 
-    s.x += windX + (Math.random() - 0.5) * chaos;
-    s.y += windY + (Math.random() - 0.5) * chaos;
-
-    const k = 300 / s.z;
-
-    const x1 = (s.px - W / 2) * k + W / 2;
-    const y1 = (s.py - H / 2) * k + H / 2;
-    const x2 = (s.x  - W / 2) * k + W / 2;
-    const y2 = (s.y  - H / 2) * k + H / 2;
-
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-
-    if (Math.abs(dx) + Math.abs(dy) > 0.3) {
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.lineWidth = (1 - s.z / W) * 2.5;
-      ctx.stroke();
-    } else {
-      ctx.fillRect(x2, y2, 1.2, 1.2);
-    }
-  }
-
-  requestAnimationFrame(draw);
-}
-
-draw();
-
-/* UI */
-hue.oninput = e => hue = +e.target.value;
-density.oninput = e => { density = +e.target.value; createStars(); };
-speed.oninput = e => speed = +e.target.value;
-chaos.oninput = e => chaos = +e.target.value;
-windx.oninput = e => windX = +e.target.value;
-windy.oninput = e => windY = +e.target.value;
-
-ibo.onclick = () => ibo = !ibo;
-
-grav.onclick = () => {
-  grav = !grav;
-  gravityCenters = [
-    { x: W * 0.3, y: H * 0.4 },
-    { x: W * 0.7, y: H * 0.6 }
-  ];
-};
-
-/* AUDIO */
-audio.onclick = async () => {
-  if (audioOn) return;
-  audioOn = true;
-
-  const A = new AudioContext();
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const src = A.createMediaStreamSource(stream);
-  const analyser = A.createAnalyser();
-
-  src.connect(analyser);
-  const data = new Uint8Array(analyser.frequencyBinCount);
-
-  function audioLoop() {
-    analyser.getByteFrequencyData(data);
-    audioAmp = data.reduce((a, b) => a + b, 0) / data.length;
-    requestAnimationFrame(audioLoop);
-  }
-  audioLoop();
-};
-</script>
+        // Periodic refresh
+        setInterval(init, 60000); // Every minute
+    </script>
+</body>
+</html>
