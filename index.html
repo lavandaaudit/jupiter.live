@@ -15,7 +15,7 @@
     .gallery img { width:320px; border-radius:15px; box-shadow:0 0 30px rgba(77,210,255,0.5); transition:transform 0.3s; }
     .gallery img:hover { transform:scale(1.05); }
     .data-box { background:rgba(77,210,255,0.1); padding:25px; border-radius:20px; margin:30px auto; max-width:700px; font-size:1.2em; line-height:1.8; }
-    iframe { border:none; border-radius:20px; box-shadow:0 0 50px rgba(77,210,255,0.6); }
+    iframe { border:none; border-radius:20px; box-shadow:0 0 50px rgba(77,210,255,0.6); width:100%; height:700px; }
     .status { font-size:1.1em; margin:10px 0; }
     footer { text-align:center; margin:80px 0 30px; opacity:0.7; font-size:1em; letter-spacing:0.3em; }
   </style>
@@ -27,86 +27,49 @@
 
     <!-- 3D Interactive Model -->
     <div class="section">
-      <div class="label">3D SYSTEM — реальні позиції супутників прямо зараз</div>
-      <iframe width="100%" height="700" src="https://sketchfab.com/models/7f5f9e0b03fd464c8e3c7464232a072d/embed?autostart=1&transparent=1&ui_hint=0&ui_infos=0&ui_watermark=0&ui_controls=0" allowfullscreen></iframe>
-      <p style="margin-top:20px;">Крути мишкою • Зум колесом • Підліт до Юпітера та супутників</p>
+      <div class="label">3D SYSTEM — реальні позиції супутників</div>
+      <iframe src="https://sketchfab.com/models/7f5f9e0b03fd464c8e3c7464232a072d/embed?autostart=1&transparent=1&ui_hint=0&ui_infos=0&ui_watermark=0" allowfullscreen></iframe>
+      <p>Крути мишкою • Зум колесом • Підліт до Юпітера</p>
     </div>
 
-    <!-- JunoCam Gallery -->
+    <!-- Juno's View with fallback -->
     <div class="section">
-      <div class="label" id="perijove-label">JUNO'S VIEW — Latest Perijove: завантаження...</div>
+      <div class="label" id="perijove-label">JUNO'S VIEW — Latest Perijove: Unknown (місія Juno завершилася 2025)</div>
       <div class="gallery" id="junocam-gallery">
-        <p>Завантаження знімків...</p>
+        <!-- Fallback знімки -->
+        <img src="https://science.nasa.gov/wp-content/uploads/2023/09/jupiter_marble_1024.jpg" alt="Jupiter full view">
+        <img src="https://photojournal.jpl.nasa.gov/jpeg/PIA26295.jpg" alt="North Polar Cyclones">
+        <img src="https://science.nasa.gov/wp-content/uploads/2024/06/jupiter-red-spot-animation.gif" alt="Great Red Spot">
       </div>
+      <p>Останні фото JunoCam (архів) — нові дані не надходять після вересня 2025</p>
     </div>
 
     <!-- Dashboard -->
     <div class="section">
       <div class="data-box">
-        <div class="label">DASHBOARD — реальний час</div>
-        <div class="status" id="dsn-status">DSN → JUNO: завантаження...</div>
-        <div class="status" id="rtt">Round Trip Light Time: —</div>
-        <div class="status" id="timestamp">Останнє оновлення: —</div>
+        <div class="label">DASHBOARD — статус системи</div>
+        <div class="status" id="dsn-status">DSN → JUNO: архівний статус (місія завершена)</div>
+        <div class="status" id="rtt">Round Trip Light Time: ~80-90 хв (приблизно)</div>
+        <div class="status" id="timestamp">Останнє оновлення: January 09, 2026</div>
       </div>
     </div>
 
-    <!-- Radio JOVE Live Spectrogram + Audio -->
+    <!-- Radio JOVE Live -->
     <div class="section">
-      <div class="label">RADIO JOVE MONITOR — живий радіошум Юпітера (16-24 MHz)</div>
-      <iframe width="100%" height="600" src="https://www.youtube.com/embed/live_stream?channel=UCtawz3MnMBwjz9ShhSC0ygQ&autoplay=1" allowfullscreen></iframe>
-      <p style="margin-top:20px;">Слухай сплески S-bursts від Іо в реальному часі! • Аудіо + спектрограма 24/7</p>
+      <div class="label">RADIO JOVE MONITOR — живий радіошум (16-24 MHz)</div>
+      <iframe src="https://www.youtube.com/embed/live_stream?channel=UCtawz3MnMBwjz9ShhSC0ygQ&autoplay=1" allowfullscreen></iframe>
+      <p>Слухай сплески від Іо в реальному часі! • Спектрограма + аудіо 24/7</p>
     </div>
 
     <!-- Storm Dynamics -->
     <div class="section">
       <div class="label">STORM DYNAMICS</div>
-      <img src="https://science.nasa.gov/wp-content/uploads/2024/06/jupiter-red-spot-animation.gif" alt="Great Red Spot" style="border-radius:20px; box-shadow:0 0 40px rgba(77,210,255,0.5);">
-      <p style="margin-top:20px;">Велика Червона Пляма • Полярні циклони • Постійний рух хмар</p>
+      <img src="https://science.nasa.gov/wp-content/uploads/2024/06/jupiter-red-spot-animation.gif" alt="Great Red Spot" style="width:80%; border-radius:20px;">
+      <p>Велика Червона Пляма • Полярні циклони • Анімація руху штормів</p>
     </div>
 
   </div>
 
   <footer>UNDERGROUND COSMO DYNAMIC TRANSMISSION · JANUARY 2026</footer>
-
-  <script>
-    async function loadData() {
-      try {
-        const response = await fetch('jupiter_state.json?t=' + Date.now());
-        const data = await response.json();
-
-        // Timestamp
-        document.getElementById('timestamp').textContent = `Останнє оновлення: ${new Date(data.timestamp).toUTCString()}`;
-
-        // JunoCam
-        document.getElementById('perijove-label').textContent = `JUNO'S VIEW — Latest Perijove: ${data.junocam?.perijove || 'Unknown'}`;
-        const gallery = document.getElementById('junocam-gallery');
-        gallery.innerHTML = '';
-        const images = data.junocam?.images || [];
-        if (images.length === 0) {
-          gallery.innerHTML = '<p>Немає нових знімків (оновиться після наступного Perijove)</p>';
-        } else {
-          images.forEach(src => {
-            const img = document.createElement('img');
-            img.src = src;
-            img.alt = 'JunoCam image';
-            gallery.appendChild(img);
-          });
-        }
-
-        // DSN
-        const dsn = data.dsn || {};
-        const statusText = dsn.status === "активний" ? "активний зв'язок" : "неактивний";
-        document.getElementById('dsn-status').textContent = `DSN → JUNO: ${statusText} (${dsn.data_rate || 'N/A'} kbps)`;
-        document.getElementById('rtt').textContent = `Round Trip Light Time: ${dsn.rtt || 'N/A'}`;
-
-      } catch (e) {
-        console.error('Помилка завантаження:', e);
-        document.getElementById('timestamp').textContent = 'Дані недоступні — перевір Actions';
-      }
-    }
-
-    loadData();
-    setInterval(loadData, 60000); // Оновлення кожну хвилину
-  </script>
 </body>
 </html>
