@@ -4,55 +4,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JUPITER LIVE: THE KING MONITOR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     body { margin:0; padding:0; background:#000; color:#cfefff; font-family:'Cinzel',serif; overflow-x:hidden; }
-    h1 { text-align:center; font-size:2.5em; letter-spacing:0.2em; margin:30px 0; text-shadow:0 0 20px #4dd2ff; }
+    h1 { text-align:center; font-size:2.8em; letter-spacing:0.25em; margin:40px 0; text-shadow:0 0 30px #4dd2ff; }
     .container { max-width:1400px; margin:0 auto; padding:20px; }
-    .section { margin:40px 0; text-align:center; }
-    .label { font-size:1.2em; letter-spacing:0.15em; opacity:0.8; margin-bottom:20px; }
-    .gallery img { width:300px; margin:10px; border-radius:10px; box-shadow:0 0 20px rgba(77,210,255,0.4); }
-    .data-box { background:rgba(77,210,255,0.1); padding:20px; border-radius:15px; margin:20px auto; max-width:600px; }
-    .data-box p { margin:10px 0; font-size:1.1em; }
-    iframe { border:none; border-radius:20px; box-shadow:0 0 40px rgba(77,210,255,0.5); }
-    footer { text-align:center; margin:50px 0 20px; opacity:0.6; font-size:0.9em; letter-spacing:0.2em; }
+    .section { margin:60px 0; text-align:center; }
+    .label { font-size:1.4em; letter-spacing:0.2em; opacity:0.9; margin-bottom:30px; text-transform:uppercase; }
+    .gallery { display:flex; flex-wrap:wrap; justify-content:center; gap:15px; }
+    .gallery img { width:320px; border-radius:15px; box-shadow:0 0 30px rgba(77,210,255,0.5); transition:transform 0.3s; }
+    .gallery img:hover { transform:scale(1.05); }
+    .data-box { background:rgba(77,210,255,0.1); padding:25px; border-radius:20px; margin:30px auto; max-width:700px; font-size:1.2em; line-height:1.8; }
+    iframe { border:none; border-radius:20px; box-shadow:0 0 50px rgba(77,210,255,0.6); }
+    .status { font-size:1.1em; margin:10px 0; }
+    footer { text-align:center; margin:80px 0 30px; opacity:0.7; font-size:1em; letter-spacing:0.3em; }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <h1>JUPITER LIVE: THE KING MONITOR</h1>
 
   <div class="container">
-    <!-- 3D Model -->
+
+    <!-- 3D Interactive Model -->
     <div class="section">
-      <div class="label">3D INTERACTIVE SYSTEM — реальні позиції зараз</div>
-      <iframe width="100%" height="600" src="https://sketchfab.com/models/7f5f9e0b03fd464c8e3c7464232a072d/embed?autostart=1&transparent=1&ui_hint=0&ui_infos=0&ui_watermark=0" allowfullscreen></iframe>
-      <p>Крути мишкою • Зум колесом • Підліт до Юпітера та супутників</p>
+      <div class="label">3D SYSTEM — реальні позиції супутників прямо зараз</div>
+      <iframe width="100%" height="700" src="https://sketchfab.com/models/7f5f9e0b03fd464c8e3c7464232a072d/embed?autostart=1&transparent=1&ui_hint=0&ui_infos=0&ui_watermark=0&ui_controls=0" allowfullscreen></iframe>
+      <p style="margin-top:20px;">Крути мишкою • Зум колесом • Підліт до Юпітера та супутників</p>
     </div>
 
-    <!-- JunoCam -->
+    <!-- JunoCam Gallery -->
     <div class="section">
       <div class="label" id="perijove-label">JUNO'S VIEW — Latest Perijove: завантаження...</div>
-      <div class="gallery" id="junocam-gallery"></div>
+      <div class="gallery" id="junocam-gallery">
+        <p>Завантаження знімків...</p>
+      </div>
     </div>
 
     <!-- Dashboard -->
     <div class="section">
       <div class="data-box">
         <div class="label">DASHBOARD — реальний час</div>
-        <p id="dsn-status">DSN Status for JUNO: завантаження...</p>
-        <p id="rtt">Round Trip Light Time: —</p>
-        <p id="radio-status">Radio JOVE: —</p>
-        <p id="grs">Great Red Spot: —</p>
-        <p id="timestamp">Останнє оновлення: —</p>
+        <div class="status" id="dsn-status">DSN → JUNO: завантаження...</div>
+        <div class="status" id="rtt">Round Trip Light Time: —</div>
+        <div class="status" id="timestamp">Останнє оновлення: —</div>
       </div>
+    </div>
+
+    <!-- Radio JOVE Live Spectrogram + Audio -->
+    <div class="section">
+      <div class="label">RADIO JOVE MONITOR — живий радіошум Юпітера (16-24 MHz)</div>
+      <iframe width="100%" height="600" src="https://www.youtube.com/embed/live_stream?channel=UCtawz3MnMBwjz9ShhSC0ygQ&autoplay=1" allowfullscreen></iframe>
+      <p style="margin-top:20px;">Слухай сплески S-bursts від Іо в реальному часі! • Аудіо + спектрограма 24/7</p>
     </div>
 
     <!-- Storm Dynamics -->
     <div class="section">
-      <div class="label">STORM DYNAMICS & TRANSITS</div>
-      <img src="https://science.nasa.gov/wp-content/uploads/2024/06/jupiter-red-spot-animation.gif" alt="GRS Animation">
-      <p>Велика Червона Пляма • Полярні циклони • Транзити супутників (Io ~1.8 дні)</p>
+      <div class="label">STORM DYNAMICS</div>
+      <img src="https://science.nasa.gov/wp-content/uploads/2024/06/jupiter-red-spot-animation.gif" alt="Great Red Spot" style="border-radius:20px; box-shadow:0 0 40px rgba(77,210,255,0.5);">
+      <p style="margin-top:20px;">Велика Червона Пляма • Полярні циклони • Постійний рух хмар</p>
     </div>
+
   </div>
 
   <footer>UNDERGROUND COSMO DYNAMIC TRANSMISSION · JANUARY 2026</footer>
@@ -60,7 +71,7 @@
   <script>
     async function loadData() {
       try {
-        const response = await fetch('jupiter_state.json?t=' + Date.now()); // cache bust
+        const response = await fetch('jupiter_state.json?t=' + Date.now());
         const data = await response.json();
 
         // Timestamp
@@ -70,25 +81,27 @@
         document.getElementById('perijove-label').textContent = `JUNO'S VIEW — Latest Perijove: ${data.junocam?.perijove || 'Unknown'}`;
         const gallery = document.getElementById('junocam-gallery');
         gallery.innerHTML = '';
-        (data.junocam?.images || []).forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          img.alt = 'JunoCam';
-          gallery.appendChild(img);
-        });
+        const images = data.junocam?.images || [];
+        if (images.length === 0) {
+          gallery.innerHTML = '<p>Немає нових знімків (оновиться після наступного Perijove)</p>';
+        } else {
+          images.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = 'JunoCam image';
+            gallery.appendChild(img);
+          });
+        }
 
         // DSN
         const dsn = data.dsn || {};
-        document.getElementById('dsn-status').textContent = `DSN → JUNO: ${dsn.data_rate ? dsn.data_rate + ' kbps' : 'неактивний'}`;
+        const statusText = dsn.status === "активний" ? "активний зв'язок" : "неактивний";
+        document.getElementById('dsn-status').textContent = `DSN → JUNO: ${statusText} (${dsn.data_rate || 'N/A'} kbps)`;
         document.getElementById('rtt').textContent = `Round Trip Light Time: ${dsn.rtt || 'N/A'}`;
 
-        // Radio & GRS (якщо є)
-        document.getElementById('radio-status').textContent = `Radio JOVE: ${data.radio_jove?.latest_burst || 'спокійно'}`;
-        document.getElementById('grs').textContent = `Great Red Spot: координати оновлюються...`;
-
       } catch (e) {
-        console.error('Помилка завантаження даних:', e);
-        document.getElementById('timestamp').textContent = 'Дані недоступні (перевір Actions)';
+        console.error('Помилка завантаження:', e);
+        document.getElementById('timestamp').textContent = 'Дані недоступні — перевір Actions';
       }
     }
 
